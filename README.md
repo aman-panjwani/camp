@@ -6,9 +6,9 @@
 </p>
 
 <p align="center">
-  <a href="https://pypi.org/project/camp/"><img src="https://img.shields.io/pypi/v/camp?label=pypi&color=blue" alt="PyPI"></a>
+  <a href="https://pypi.org/project/campii/"><img src="https://img.shields.io/pypi/v/campii?label=pypi&color=blue" alt="PyPI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License: MIT"></a>
-  <a href="https://pypi.org/project/camp/"><img src="https://img.shields.io/badge/python-3.11%20|%203.12-blue" alt="Python"></a>
+  <a href="https://pypi.org/project/campii/"><img src="https://img.shields.io/badge/python-3.11%20|%203.12-blue" alt="Python"></a>
   <a href="https://arxiv.org"><img src="https://img.shields.io/badge/arXiv-2026-b31b1b" alt="arXiv"></a>
 </p>
 
