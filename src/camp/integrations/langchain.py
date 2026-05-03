@@ -3,7 +3,7 @@ camp.integrations.langchain
 ---------------------------
 LangChain integration for CAMP PII protection.
 
-Requires: pip install camp[langchain]
+Requires: pip install campii[langchain]
 
 Two integration styles:
 
@@ -32,7 +32,7 @@ try:
 except ImportError as exc:
     raise ImportError(
         "LangChain integration requires langchain-core. "
-        "Install with: pip install camp[langchain]"
+        "Install with: pip install campii[langchain]"
     ) from exc
 
 

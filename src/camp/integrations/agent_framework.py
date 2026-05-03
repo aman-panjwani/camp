@@ -3,7 +3,7 @@ camp.integrations.agent_framework
 ----------------------------------
 Microsoft Agent Framework integration for CAMP PII protection.
 
-Requires: pip install camp[agent-framework]
+Requires: pip install campii[agent-framework]
 
 CAMP sits as AgentMiddleware at the user → agent boundary:
   - Intercepts context.messages[-1] (the current user turn)
@@ -50,7 +50,7 @@ try:
 except ImportError as exc:
     raise ImportError(
         "Microsoft Agent Framework integration requires agent-framework. "
-        "Install with: pip install camp[agent-framework]"
+        "Install with: pip install campii[agent-framework]"
     ) from exc
 
 

@@ -63,7 +63,7 @@ Hard-blocked types (always redacted): `US_SSN`, `CREDIT_CARD`, `ACCOUNT_NUMBER`
 **Requirements:** Python 3.11+
 
 ```bash
-pip install camp
+pip install campii
 ```
 
 CAMP uses spaCy for named entity recognition. Download the required model after installation:
@@ -76,9 +76,9 @@ python -m spacy download en_core_web_lg
 
 | Extra | Command | Adds |
 |---|---|---|
-| LangChain | `pip install camp[langchain]` | `CAMPCallbackHandler`, `CAMPChain` |
-| Agent Framework | `pip install camp[agent-framework]` | `CAMPAgentMiddleware` |
-| All integrations | `pip install camp[all]` | Everything above |
+| LangChain | `pip install campii[langchain]` | `CAMPCallbackHandler`, `CAMPChain` |
+| Agent Framework | `pip install campii[agent-framework]` | `CAMPAgentMiddleware` |
+| All integrations | `pip install campii[all]` | Everything above |
 
 ---
 
@@ -159,7 +159,7 @@ clean  = session.demask(raw)           # restore real identity in the response
 
 ### Integration 2 - LangChain
 
-Requires `pip install camp[langchain]`
+Requires `pip install campii[langchain]`
 
 **Option A - callback handler** (attach to any existing chain or LLM):
 
@@ -194,7 +194,7 @@ print(protected.handler.triggered)
 
 ### Integration 3 - Microsoft Agent Framework
 
-Requires `pip install camp[agent-framework]`
+Requires `pip install campii[agent-framework]`
 
 **Class-based middleware** (recommended - maintains session state across all runs):
 

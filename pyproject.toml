@@ -3,8 +3,8 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "camp"
-version = "0.1.0"
+name = "campii"
+version = "0.1.1"
 description = "CAMP: Cumulative Agentic Masking and Pruning - session-aware PII protection for LLM pipelines"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -32,7 +32,7 @@ dependencies = [
 [project.optional-dependencies]
 langchain = ["langchain>=0.2.0", "langchain-core>=0.2.0"]
 agent-framework = ["agent-framework>=1.0.0"]
-all = ["camp[langchain,agent-framework]"]
+all = ["campii[langchain,agent-framework]"]
 dev = [
     "pytest>=8.0",
     "pytest-cov>=5.0",
