@@ -1,0 +1,65 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "camp"
+version = "0.1.0"
+description = "CAMP: Cumulative Agentic Masking and Pruning - session-aware PII protection for LLM pipelines"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.11"
+keywords = ["pii", "privacy", "llm", "masking", "presidio", "anonymization", "camp"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+
+dependencies = [
+    "presidio-analyzer>=2.2.355",
+    "presidio-anonymizer>=2.2.355",
+    "spacy>=3.7.4",
+    "networkx>=3.3",
+    "faker>=24.0.0",
+]
+
+[project.optional-dependencies]
+langchain = ["langchain>=0.2.0", "langchain-core>=0.2.0"]
+agent-framework = ["agent-framework>=1.0.0"]
+all = ["camp[langchain,agent-framework]"]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "pytest-asyncio>=0.23",
+    "mypy>=1.10",
+    "ruff>=0.4",
+]
+
+[project.urls]
+Homepage = "https://github.com/aman-panjwani/camp"
+Documentation = "https://github.com/aman-panjwani/camp#readme"
+"Bug Tracker" = "https://github.com/aman-panjwani/camp/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/camp"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
