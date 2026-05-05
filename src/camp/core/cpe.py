@@ -18,8 +18,9 @@ class CPEScorer:
     Computes CPE score after each turn and tracks full score history.
     """
 
-    def __init__(self, threshold: float = 2.0) -> None:
+    def __init__(self, threshold: float = 2.0, weights: dict[str, float] | None = None) -> None:
         self.threshold = threshold
+        self._weights  = {**ENTITY_WEIGHTS, **(weights or {})}
         self._history: List[float] = []
         self._triggered = False
         self._trigger_turn: Optional[int] = None
@@ -30,7 +31,7 @@ class CPEScorer:
         """
         score = 0.0
         for node in graph.nodes():
-            weight    = ENTITY_WEIGHTS.get(node, 0.3)
+            weight    = self._weights.get(node, 0.3)
             amplifier = graph.combination_amplifier(node)
             score    += weight * amplifier
         return round(score, 4)
@@ -62,7 +63,7 @@ class CPEScorer:
         """Per-entity contribution breakdown for inspection and paper tables."""
         result = {}
         for node in graph.nodes():
-            weight    = ENTITY_WEIGHTS.get(node, 0.3)
+            weight    = self._weights.get(node, 0.3)
             amplifier = graph.combination_amplifier(node)
             result[node] = {
                 "label":        ENTITY_LABELS.get(node, node),

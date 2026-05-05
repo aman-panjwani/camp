@@ -57,18 +57,19 @@ class CAMPMasker:
 
     def __init__(
         self,
-        threshold:   float            = 2.0,
-        alpha:       float            = 0.3,
-        session_id:  str              = "session",
-        redaction_map: dict[str, str] | None = None,
-        extra_patterns: list[dict] | None = None,
+        threshold:      float                 = 2.0,
+        alpha:          float                 = 0.3,
+        session_id:     str                   = "session",
+        redaction_map:  dict[str, str] | None = None,
+        extra_patterns: list[dict]    | None  = None,
+        entity_weights: dict[str, float] | None = None,
     ) -> None:
         self.threshold       = threshold
         self._redaction_map  = redaction_map
-        self._extra_patterns = extra_patterns  # caller-defined regex patterns
+        self._extra_patterns = extra_patterns
         self.registry      = PIIRegistry(session_id=session_id)
         self.graph         = PIICooccurrenceGraph(alpha=alpha)
-        self.scorer        = CPEScorer(threshold=threshold)
+        self.scorer        = CPEScorer(threshold=threshold, weights=entity_weights)
         self.pseudonymizer = Pseudonymizer(redaction_map=redaction_map)
         self._results: List[TurnResult] = []
 
