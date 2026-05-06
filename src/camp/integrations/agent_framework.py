@@ -54,7 +54,7 @@ except ImportError as exc:
     ) from exc
 
 
-class CAMPAgentMiddleware(AgentMiddleware):
+class CAMPAgentMiddleware(AgentMiddleware):  # type: ignore[misc]
     """
     Microsoft Agent Framework middleware applying CAMP PII protection.
 
@@ -151,7 +151,7 @@ class CAMPAgentMiddleware(AgentMiddleware):
         return self._last_result
 
     @property
-    def pseudonym_map(self) -> dict:
+    def pseudonym_map(self) -> dict[str, str]:
         return self._masker.pseudonym_map()
 
     @property
@@ -189,7 +189,7 @@ def create_camp_middleware(
     )
     turn_index_box = [0]  # mutable container for closure state
 
-    @agent_middleware
+    @agent_middleware  # type: ignore[misc]
     async def _camp_middleware(
         context:   AgentContext,
         call_next: Callable[[], Awaitable[None]],

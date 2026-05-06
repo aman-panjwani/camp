@@ -397,7 +397,7 @@ def extract_pii(
 
     results = get_analyzer().analyze(
         text=text, language="en", score_threshold=0.35,
-        ad_hoc_recognizers=ad_hoc or None,
+        ad_hoc_recognizers=ad_hoc or None,  # type: ignore[arg-type]
     )
     entities: list[DetectedEntity] = []
     seen:     set[tuple[str, str]] = set()

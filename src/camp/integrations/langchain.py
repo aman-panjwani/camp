@@ -36,7 +36,7 @@ except ImportError as exc:
     ) from exc
 
 
-class CAMPCallbackHandler(BaseCallbackHandler):
+class CAMPCallbackHandler(BaseCallbackHandler):  # type: ignore[misc]
     """
     LangChain callback handler that applies CAMP PII protection.
 

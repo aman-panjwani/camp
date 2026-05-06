@@ -146,7 +146,7 @@ class Pseudonymizer:
                 try:
                     amount    = float(numbers[0].replace(',', ''))
                     variation = random.uniform(0.85, 1.15)
-                    new_amount = amount * variation
+                    new_amount: float = amount * variation
                     suffix_match = re.search(r'[MBKmbk]$', real.strip())
                     if suffix_match:
                         return f"${round(new_amount)}{suffix_match.group(0).upper()}"
