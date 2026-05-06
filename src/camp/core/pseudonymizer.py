@@ -7,8 +7,12 @@
 
 import random
 import re
+from typing import TYPE_CHECKING
 
 from faker import Faker
+
+if TYPE_CHECKING:
+    from camp.core.registry import TurnRecord
 
 from camp.core.entities import (
     ACCOUNT,
@@ -108,8 +112,8 @@ class Pseudonymizer:
             numbers = re.findall(r'[\d,]+', real)
             if numbers:
                 try:
-                    amount     = int(numbers[0].replace(',', ''))
-                    variation  = random.randint(-10, 10)
+                    amount:    float = float(int(numbers[0].replace(',', '')))
+                    variation: float = float(random.randint(-10, 10))
                     new_amount = round(int(amount * (1 + variation / 100)) / 1000) * 1000
                     return f"{new_amount:,} dollars a year"
                 except ValueError:
@@ -268,7 +272,7 @@ class Pseudonymizer:
                 result = result.replace(pseudo, real)
         return result
 
-    def rewrite_history(self, turns: list) -> list[str]:
+    def rewrite_history(self, turns: "list[TurnRecord]") -> list[str]:
         """
         Retroactively rewrite full conversation history with pseudonyms.
         Called when CPE threshold is crossed.

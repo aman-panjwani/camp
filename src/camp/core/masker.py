@@ -10,7 +10,7 @@
 import json
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, cast
 
 from camp.core.cpe import CPEScorer
 from camp.core.entities import get_risk_band
@@ -63,7 +63,7 @@ class CAMPMasker:
         alpha:          float                 = 0.3,
         session_id:     str                   = "session",
         redaction_map:  dict[str, str] | None = None,
-        custom_patterns: list[dict]    | None  = None,
+        custom_patterns: list[dict[str, Any]] | None = None,
         entity_weights: dict[str, float] | None = None,
     ) -> None:
         self.threshold       = threshold
@@ -152,7 +152,7 @@ class CAMPMasker:
     def trigger_turn(self) -> int | None:
         return self.scorer.trigger_turn()
 
-    def pseudonym_map(self) -> dict:
+    def pseudonym_map(self) -> dict[str, str]:
         return self.pseudonymizer.pseudonym_map()
 
     def reset(self) -> None:
@@ -165,7 +165,7 @@ class CAMPMasker:
 
     # ── Tool-call helpers ─────────────────────────────────────────────────────
 
-    def demask_args(self, args: dict) -> dict:
+    def demask_args(self, args: dict[str, Any]) -> dict[str, Any]:
         """Recursively restore real values in tool call arguments (handles nested dicts/lists)."""
         def _walk(obj: Any) -> Any:
             if isinstance(obj, str):
@@ -175,9 +175,9 @@ class CAMPMasker:
             if isinstance(obj, list):
                 return [_walk(item) for item in obj]
             return obj
-        return _walk(args)
+        return cast(dict[str, Any], _walk(args))
 
-    def mask_content(self, content: str | dict | list) -> str:
+    def mask_content(self, content: str | dict[str, Any] | list[Any]) -> str:
         """Replace real PII in a tool result with session pseudonyms before sending back to LLM."""
         text = json.dumps(content) if isinstance(content, (dict, list)) else str(content)
         pmap = self.pseudonymizer.pseudonym_map()
@@ -186,7 +186,9 @@ class CAMPMasker:
                 text = text.replace(real, fake)
         return text
 
-    def build_tool_result(self, tool_use_id: str, content: str | dict | list) -> dict:
+    def build_tool_result(
+        self, tool_use_id: str, content: str | dict[str, Any] | list[Any]
+    ) -> dict[str, str]:
         """Format a masked tool result as an Anthropic tool_result message."""
         return {
             "type":        "tool_result",
@@ -194,13 +196,17 @@ class CAMPMasker:
             "content":     content if isinstance(content, str) else json.dumps(content),
         }
 
-    def process_tool_call(self, tool_use_id: str, args: dict, fn: Callable) -> dict:
+    def process_tool_call(
+        self, tool_use_id: str, args: dict[str, Any], fn: Callable[..., Any]
+    ) -> dict[str, str]:
         """Sync: demask args -> call fn(**args) -> mask result -> format tool_result."""
         real_args = self.demask_args(args)
         result    = fn(**real_args)
         return self.build_tool_result(tool_use_id, self.mask_content(result))
 
-    async def process_tool_call_async(self, tool_use_id: str, args: dict, fn: Any) -> dict:
+    async def process_tool_call_async(
+        self, tool_use_id: str, args: dict[str, Any], fn: Any
+    ) -> dict[str, str]:
         """Async: demask args -> await fn(**args) -> mask result -> format tool_result."""
         real_args = self.demask_args(args)
         result    = await fn(**real_args)

@@ -7,6 +7,7 @@
 
 from collections import defaultdict
 from dataclasses import dataclass, field
+from typing import Any
 
 from camp.core.extractor import DetectedEntity
 
@@ -87,7 +88,7 @@ class PIIRegistry:
                 types.update(record.entity_types)
         return types
 
-    def cumulative_types_per_turn(self) -> list[set[str]]:
+    def cumulative_types_per_turn(self) -> list[frozenset[str]]:
         """List where index i contains all unique PII types seen through turn i."""
         cumulative = []
         seen: set[str] = set()
@@ -96,7 +97,7 @@ class PIIRegistry:
             cumulative.append(frozenset(seen))
         return cumulative
 
-    def summary(self) -> dict:
+    def summary(self) -> dict[str, Any]:
         return {
             "session_id":        self.session_id,
             "total_turns":       len(self._turns),

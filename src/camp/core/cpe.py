@@ -8,6 +8,8 @@
 # Computes CPE after each turn using the current co-occurrence graph.
 
 
+from typing import Any
+
 from camp.core.entities import ENTITY_LABELS, ENTITY_WEIGHTS
 from camp.core.graph import PIICooccurrenceGraph
 
@@ -58,7 +60,7 @@ class CPEScorer:
     def trigger_turn(self) -> int | None:
         return self._trigger_turn
 
-    def breakdown(self, graph: PIICooccurrenceGraph) -> dict[str, dict]:
+    def breakdown(self, graph: PIICooccurrenceGraph) -> dict[str, dict[str, Any]]:
         """Per-entity contribution breakdown for inspection and paper tables."""
         result = {}
         for node in graph.nodes():

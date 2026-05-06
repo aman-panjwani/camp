@@ -8,6 +8,7 @@
 
 import re
 from dataclasses import dataclass
+from typing import Any
 
 from presidio_analyzer import AnalyzerEngine, Pattern, PatternRecognizer
 from presidio_analyzer.nlp_engine import NlpEngineProvider
@@ -372,7 +373,7 @@ def _merge_locations(
 def extract_pii(
     text: str,
     turn_index: int = 0,
-    custom_patterns: list[dict] | None = None,
+    custom_patterns: list[dict[str, Any]] | None = None,
 ) -> list[DetectedEntity]:
     """Extract PII entities from text using Presidio + custom recognizers.
 
