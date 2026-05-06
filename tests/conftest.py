@@ -1,7 +1,7 @@
 """Shared fixtures for the CAMP test suite."""
 import pytest
 
-from camp.core.entities import PERSON, LOCATION, ORGANIZATION, EMAIL, SSN, SALARY, ACCOUNT
+from camp.core.entities import LOCATION, PERSON, SALARY, SSN
 from camp.core.extractor import DetectedEntity
 from camp.core.masker import CAMPMasker
 from camp.integrations.llm import CAMPSession

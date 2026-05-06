@@ -1,6 +1,4 @@
-import pytest
-from camp.core.masker import CAMPMasker, TurnResult, PASS, PSEUDONYMIZE, BLOCK
-
+from camp.core.masker import BLOCK, PASS, PSEUDONYMIZE, CAMPMasker, TurnResult
 
 # ── Initial state ─────────────────────────────────────────────────
 

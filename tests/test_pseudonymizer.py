@@ -1,11 +1,16 @@
-from camp.core.pseudonymizer import Pseudonymizer
-from camp.core.extractor import DetectedEntity
 from camp.core.entities import (
-    PERSON, LOCATION, ORGANIZATION, EMAIL, PHONE,
-    SSN, CREDIT_CARD, ACCOUNT, SALARY, AGE,
-    FINANCIAL_AMOUNT, FINANCIAL_METRIC,
-    INTERNAL_PROJECTION, CONFIDENTIAL_DATA,
+    ACCOUNT,
+    CONFIDENTIAL_DATA,
+    CREDIT_CARD,
+    EMAIL,
+    FINANCIAL_AMOUNT,
+    LOCATION,
+    PERSON,
+    SALARY,
+    SSN,
 )
+from camp.core.extractor import DetectedEntity
+from camp.core.pseudonymizer import Pseudonymizer
 
 
 def _entity(etype: str, value: str) -> DetectedEntity:
@@ -40,7 +45,9 @@ def test_same_value_same_pseudonym():
 
 def test_different_values_different_pseudonyms():
     p = Pseudonymizer()
-    assert p.get_pseudonym(_entity(PERSON, "Alice Smith")) != p.get_pseudonym(_entity(PERSON, "Bob Jones"))
+    a = p.get_pseudonym(_entity(PERSON, "Alice Smith"))
+    b = p.get_pseudonym(_entity(PERSON, "Bob Jones"))
+    assert a != b
 
 
 def test_person_generates_non_empty_name():

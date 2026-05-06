@@ -20,9 +20,9 @@ Quick start:
     response = session.chat("My SSN is 512-34-7891")
 """
 
+from camp.core.entities import DEFAULT_REDACTION_MAP, HARD_BLOCK_TYPES
 from camp.core.masker import CAMPMasker, TurnResult
 from camp.integrations.llm import CAMPSession
-from camp.core.entities import DEFAULT_REDACTION_MAP, HARD_BLOCK_TYPES
 
 __all__ = ["CAMPMasker", "TurnResult", "CAMPSession", "DEFAULT_REDACTION_MAP", "HARD_BLOCK_TYPES"]
 __version__ = "0.1.6"

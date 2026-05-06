@@ -2,12 +2,10 @@
 Extractor tests use mocked Presidio to avoid loading the spaCy model in CI.
 Integration tests that require the real model are marked with @pytest.mark.slow.
 """
-from unittest.mock import MagicMock, patch
 
-import pytest
 
+from camp.core.entities import ACCOUNT, LOCATION, PERSON, SSN
 from camp.core.extractor import DetectedEntity, mask_text
-from camp.core.entities import PERSON, LOCATION, SSN, ACCOUNT, SALARY
 
 
 def _entity(etype: str, value: str, start: int = 0) -> DetectedEntity:

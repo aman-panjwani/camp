@@ -8,29 +8,28 @@
 
 import re
 from dataclasses import dataclass
-from typing import List, Tuple
+from typing import Any
 
-from presidio_analyzer import AnalyzerEngine, PatternRecognizer, Pattern
+from presidio_analyzer import AnalyzerEngine, Pattern, PatternRecognizer
 from presidio_analyzer.nlp_engine import NlpEngineProvider
 
 from camp.core.entities import (
-    ENTITY_WEIGHTS,
-    ENTITY_LABELS,
-    HARD_BLOCK_TYPES,
-    DEFAULT_REDACTION_MAP,
-    ALL_ENTITY_TYPES,
-    LOCATION,
-    ORGANIZATION,
-    SALARY,
     ACCOUNT,
+    ALL_ENTITY_TYPES,
+    CONFIDENTIAL_DATA,
     CREDIT_CARD,
+    DEFAULT_REDACTION_MAP,
     DRIVER_LICENSE,
-    SWIFT_BIC,
-    TRANSACTION_ID,
+    ENTITY_LABELS,
+    ENTITY_WEIGHTS,
     FINANCIAL_AMOUNT,
     FINANCIAL_METRIC,
     INTERNAL_PROJECTION,
-    CONFIDENTIAL_DATA,
+    LOCATION,
+    ORGANIZATION,
+    SALARY,
+    SWIFT_BIC,
+    TRANSACTION_ID,
 )
 
 # Normalize Presidio built-in types that don't match our entity constants.
@@ -337,13 +336,13 @@ def get_analyzer() -> AnalyzerEngine:
 
 def _merge_locations(
     text: str,
-    entities: List[DetectedEntity],
-) -> List[DetectedEntity]:
+    entities: list[DetectedEntity],
+) -> list[DetectedEntity]:
     """Merge consecutive LOCATION entities separated by whitespace or comma."""
     loc_entities = [e for e in entities if e.entity_type == LOCATION]
     non_loc      = [e for e in entities if e.entity_type != LOCATION]
 
-    merged: List[DetectedEntity] = []
+    merged: list[DetectedEntity] = []
     i = 0
     while i < len(loc_entities):
         current = loc_entities[i]
@@ -374,8 +373,8 @@ def _merge_locations(
 def extract_pii(
     text: str,
     turn_index: int = 0,
-    custom_patterns: List[dict] | None = None,
-) -> List[DetectedEntity]:
+    custom_patterns: list[dict[str, Any]] | None = None,
+) -> list[DetectedEntity]:
     """Extract PII entities from text using Presidio + custom recognizers.
 
     custom_patterns: optional list of dicts, each with keys:
@@ -398,11 +397,11 @@ def extract_pii(
 
     results = get_analyzer().analyze(
         text=text, language="en", score_threshold=0.35,
-        ad_hoc_recognizers=ad_hoc or None,
+        ad_hoc_recognizers=ad_hoc or None,  # type: ignore[arg-type]
     )
-    entities: List[DetectedEntity] = []
+    entities: list[DetectedEntity] = []
     seen:     set[tuple[str, str]] = set()
-    covered:  List[Tuple[int, int]] = []
+    covered:  list[tuple[int, int]] = []
 
     for r in sorted(results, key=lambda r: r.end - r.start, reverse=True):
         value = text[r.start:r.end].strip()
@@ -460,7 +459,7 @@ def extract_pii(
 
 def mask_text(
     text: str,
-    entities: List[DetectedEntity],
+    entities: list[DetectedEntity],
     redaction_map: dict[str, str] | None = None,
 ) -> str:
     """Replace detected PII with per-entity redaction strings or type placeholders."""

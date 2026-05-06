@@ -34,9 +34,9 @@ Usage - function-based factory (lightweight, per-run):
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
-from typing import Any, Optional
+from typing import Any
 
-from camp.core.masker import CAMPMasker, TurnResult, BLOCK
+from camp.core.masker import BLOCK, CAMPMasker, TurnResult
 
 try:
     from agent_framework import (
@@ -54,7 +54,7 @@ except ImportError as exc:
     ) from exc
 
 
-class CAMPAgentMiddleware(AgentMiddleware):
+class CAMPAgentMiddleware(AgentMiddleware):  # type: ignore[misc]
     """
     Microsoft Agent Framework middleware applying CAMP PII protection.
 
@@ -88,7 +88,7 @@ class CAMPAgentMiddleware(AgentMiddleware):
             session_id=session_id, redaction_map=redaction_map,
         )
         self._turn_index = 0
-        self._last_result: Optional[TurnResult] = None
+        self._last_result: TurnResult | None = None
 
     async def process(
         self,
@@ -147,11 +147,11 @@ class CAMPAgentMiddleware(AgentMiddleware):
         return self._masker.scorer.triggered()
 
     @property
-    def last_result(self) -> Optional[TurnResult]:
+    def last_result(self) -> TurnResult | None:
         return self._last_result
 
     @property
-    def pseudonym_map(self) -> dict:
+    def pseudonym_map(self) -> dict[str, str]:
         return self._masker.pseudonym_map()
 
     @property
@@ -184,10 +184,12 @@ def create_camp_middleware(
         camp   = create_camp_middleware(threshold=1.5)
         result = await agent.run("My name is Sarah", middleware=[camp])
     """
-    masker = CAMPMasker(threshold=threshold, alpha=alpha, session_id=session_id, redaction_map=redaction_map)
+    masker = CAMPMasker(
+        threshold=threshold, alpha=alpha, session_id=session_id, redaction_map=redaction_map
+    )
     turn_index_box = [0]  # mutable container for closure state
 
-    @agent_middleware
+    @agent_middleware  # type: ignore[untyped-decorator]
     async def _camp_middleware(
         context:   AgentContext,
         call_next: Callable[[], Awaitable[None]],
