@@ -25,5 +25,5 @@ from camp.core.masker import CAMPMasker, TurnResult
 from camp.integrations.llm import CAMPSession
 
 __all__ = ["CAMPMasker", "TurnResult", "CAMPSession", "DEFAULT_REDACTION_MAP", "HARD_BLOCK_TYPES"]
-__version__ = "0.1.6"
+__version__ = "1.0.0"
 __author__ = "Aman Panjwani"
