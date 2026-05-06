@@ -27,6 +27,7 @@ CAMP tracks cumulative PII exposure across an entire conversation - not just a s
   - [Any LLM callable](#integration-1---any-llm-callable)
   - [LangChain](#integration-2---langchain)
   - [Microsoft Agent Framework](#integration-3---microsoft-agent-framework)
+- [Tool calling](#tool-calling)
 - [Configuration](#configuration)
 - [Supported entity types](#supported-entity-types)
 - [Development](#development)
@@ -101,9 +102,10 @@ for i, text in enumerate(conversation):
     result = masker.process_turn(text, turn_index=i)
     print(f"Turn {i}  [{result.decision:13}]  CPE={result.cpe_score:.2f}  |  {result.sent_to_llm}")
 
-# Restore real identities in the LLM response before showing to the user
 llm_response = "I can help you with that, Michael."
 clean = masker.demask_response(llm_response)
+
+masker.reset()
 ```
 
 **Example output:**
@@ -136,12 +138,11 @@ def my_llm(prompt: str) -> str:
         messages=[{"role": "user", "content": prompt}],
     ).choices[0].message.content
 
-# Wrap once - protection is applied automatically on every call
 session = CAMPSession.wrap(my_llm, threshold=2.0, alpha=0.3)
 
 response = session.chat("My name is Sarah Johnson")
 response = session.chat("I live in Denver, Colorado")
-response = session.chat("My SSN is 512-34-7891")  # blocked, LLM is never called
+response = session.chat("My SSN is 512-34-7891")
 
 print(f"CPE score : {session.cpe_score:.2f}")
 print(f"Triggered : {session.triggered}")
@@ -151,8 +152,8 @@ print(f"Triggered : {session.triggered}")
 
 ```python
 result = session.process("My email is sarah@example.com")
-raw    = my_llm(result.sent_to_llm)   # call LLM with masked text
-clean  = session.demask(raw)           # restore real identity in the response
+raw    = my_llm(result.sent_to_llm)
+clean  = session.demask(raw)
 ```
 
 ---
@@ -218,7 +219,6 @@ async def main():
         await agent.run("My name is Sarah Johnson")
         await agent.run("I live in Denver, Colorado")
         await agent.run("My SSN is 512-34-7891")
-        # ^ Blocked before reaching the agent; returns a safe refusal message
 
         camp = agent.middleware[0]
         print(f"CPE score  : {camp.cpe_score:.2f}")
@@ -239,6 +239,45 @@ result = await agent.run("My name is Sarah Johnson", middleware=[camp])
 
 ---
 
+## Tool calling
+
+When an LLM uses tools, PII crosses four boundaries. CAMP provides helpers that handle the full demask → call → remask cycle.
+
+```python
+masker = CAMPMasker(threshold=2.0)
+result = masker.process_turn(message, turn_index=0)
+
+for block in response.content:
+    if block.type == "tool_use":
+        tool_result = masker.process_tool_call(
+            block.id,
+            block.input,
+            TOOL_REGISTRY[block.name],
+        )
+        tool_results.append(tool_result)
+```
+
+**Async tools** (MCP, remote APIs):
+
+```python
+tool_result = await masker.process_tool_call_async(
+    block.id,
+    block.input,
+    async_tool_fn,
+)
+```
+
+**Building-block methods** for full control:
+
+```python
+real_args     = masker.demask_args(block.input)
+real_output   = my_tool(**real_args)
+masked_output = masker.mask_content(real_output)
+tool_result   = masker.build_tool_result(block.id, masked_output)
+```
+
+---
+
 ## Configuration
 
 ### Constructor parameters
@@ -249,7 +288,23 @@ result = await agent.run("My name is Sarah Johnson", middleware=[camp])
 | `alpha` | `0.3` | Graph amplifier - controls how much entity co-occurrence raises the score |
 | `session_id` | `"default"` | Session label used in the PII registry |
 | `redaction_map` | `None` | Override default hard-block replacements |
-| `extra_patterns` | `None` | Additional regex recognizers for domain-specific PII |
+| `custom_patterns` | `None` | Additional regex recognizers for domain-specific PII |
+| `entity_weights` | `None` | Per-entity weight overrides (merged with defaults) |
+
+### Session management
+
+Call `masker.reset()` to clear all session state while keeping your configuration (threshold, alpha, weights, etc.):
+
+```python
+masker = CAMPMasker(threshold=2.0)
+
+masker.process_turn("My name is Sarah Johnson", turn_index=0)
+masker.process_turn("I live in Denver, Colorado", turn_index=1)
+
+masker.reset()
+
+masker.process_turn("Starting fresh", turn_index=0)
+```
 
 ### Risk bands
 
@@ -267,10 +322,21 @@ Pass domain-specific patterns at construction time:
 ```python
 masker = CAMPMasker(
     threshold=2.0,
-    extra_patterns=[
+    custom_patterns=[
         {"entity": "EMPLOYEE_ID", "pattern": r"\bEMP-\d{6}\b", "score": 0.9},
         {"entity": "PROJECT_CODE", "pattern": r"\bPRJ-[A-Z]{3}-\d{4}\b", "score": 0.85},
     ],
+)
+```
+
+### Entity weight overrides
+
+Raise sensitivity for regulated industries without changing global defaults:
+
+```python
+masker = CAMPMasker(
+    threshold=2.0,
+    entity_weights={"PERSON": 1.0, "EMAIL_ADDRESS": 1.0, "PHONE_NUMBER": 1.0},
 )
 ```
 
@@ -301,10 +367,7 @@ python -m spacy download en_core_web_lg
 **Run the test suite:**
 
 ```bash
-# Unit tests (no spaCy model required - Presidio is mocked)
 pytest tests/ -v
-
-# With coverage report
 pytest tests/ --cov=camp --cov-report=term-missing
 ```
 

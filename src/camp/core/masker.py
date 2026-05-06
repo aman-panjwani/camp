@@ -7,8 +7,9 @@
 #   PSEUDONYMIZE CPE crossed threshold - rewrite full history with pseudonyms
 #   BLOCK        Hard-block entity detected - always block regardless of CPE
 
+import json
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import Any, Callable, List, Optional
 
 from camp.core.extractor import extract_pii, mask_text, DetectedEntity
 from camp.core.registry import PIIRegistry, TurnRecord
@@ -61,12 +62,15 @@ class CAMPMasker:
         alpha:          float                 = 0.3,
         session_id:     str                   = "session",
         redaction_map:  dict[str, str] | None = None,
-        extra_patterns: list[dict]    | None  = None,
+        custom_patterns: list[dict]    | None  = None,
         entity_weights: dict[str, float] | None = None,
     ) -> None:
         self.threshold       = threshold
+        self._alpha          = alpha
+        self._session_id     = session_id
         self._redaction_map  = redaction_map
-        self._extra_patterns = extra_patterns
+        self._custom_patterns = custom_patterns
+        self._entity_weights = entity_weights
         self.registry      = PIIRegistry(session_id=session_id)
         self.graph         = PIICooccurrenceGraph(alpha=alpha)
         self.scorer        = CPEScorer(threshold=threshold, weights=entity_weights)
@@ -85,7 +89,7 @@ class CAMPMasker:
             TurnResult with the full decision and what to send to the LLM.
         """
         # Step 1 - Extract PII locally
-        entities = extract_pii(text, turn_index, self._extra_patterns)
+        entities = extract_pii(text, turn_index, self._custom_patterns)
 
         # Step 2 - Update registry
         self.registry.add_turn(
@@ -149,3 +153,54 @@ class CAMPMasker:
 
     def pseudonym_map(self) -> dict:
         return self.pseudonymizer.pseudonym_map()
+
+    def reset(self) -> None:
+        """Clear all session state. Config (threshold, alpha, etc.) is preserved."""
+        self.registry      = PIIRegistry(session_id=self._session_id)
+        self.graph         = PIICooccurrenceGraph(alpha=self._alpha)
+        self.scorer        = CPEScorer(threshold=self.threshold, weights=self._entity_weights)
+        self.pseudonymizer = Pseudonymizer(redaction_map=self._redaction_map)
+        self._results      = []
+
+    # ── Tool-call helpers ─────────────────────────────────────────────────────
+
+    def demask_args(self, args: dict) -> dict:
+        """Recursively restore real values in tool call arguments (handles nested dicts/lists)."""
+        def _walk(obj: Any) -> Any:
+            if isinstance(obj, str):
+                return self.pseudonymizer.demask_response(obj)
+            if isinstance(obj, dict):
+                return {k: _walk(v) for k, v in obj.items()}
+            if isinstance(obj, list):
+                return [_walk(item) for item in obj]
+            return obj
+        return _walk(args)
+
+    def mask_content(self, content: str | dict | list) -> str:
+        """Replace real PII in a tool result with session pseudonyms before sending back to LLM."""
+        text = json.dumps(content) if isinstance(content, (dict, list)) else str(content)
+        pmap = self.pseudonymizer.pseudonym_map()
+        for real, fake in sorted(pmap.items(), key=lambda x: len(x[0]), reverse=True):
+            if real in text:
+                text = text.replace(real, fake)
+        return text
+
+    def build_tool_result(self, tool_use_id: str, content: str | dict | list) -> dict:
+        """Format a masked tool result as an Anthropic tool_result message."""
+        return {
+            "type":        "tool_result",
+            "tool_use_id": tool_use_id,
+            "content":     content if isinstance(content, str) else json.dumps(content),
+        }
+
+    def process_tool_call(self, tool_use_id: str, args: dict, fn: Callable) -> dict:
+        """Sync: demask args -> call fn(**args) -> mask result -> format tool_result."""
+        real_args = self.demask_args(args)
+        result    = fn(**real_args)
+        return self.build_tool_result(tool_use_id, self.mask_content(result))
+
+    async def process_tool_call_async(self, tool_use_id: str, args: dict, fn: Any) -> dict:
+        """Async: demask args -> await fn(**args) -> mask result -> format tool_result."""
+        real_args = self.demask_args(args)
+        result    = await fn(**real_args)
+        return self.build_tool_result(tool_use_id, self.mask_content(result))

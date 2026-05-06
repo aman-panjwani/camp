@@ -57,6 +57,18 @@ class Pseudonymizer:
         pseudo = self._generate(entity.entity_type, real)
         self._map[real]           = pseudo
         self._reverse_map[pseudo] = real
+
+        # For person names, also register first-name so the LLM can address
+        # the user informally (e.g. "Hi Javier") and still get demasked.
+        if entity.entity_type == PERSON:
+            real_parts   = real.split()
+            pseudo_parts = pseudo.split()
+            if len(real_parts) >= 2 and len(pseudo_parts) >= 2:
+                fake_first = pseudo_parts[0]
+                real_first = real_parts[0]
+                if fake_first not in self._reverse_map:
+                    self._reverse_map[fake_first] = real_first
+
         return pseudo
 
     def _generate(self, entity_type: str, real: str) -> str:

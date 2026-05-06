@@ -374,19 +374,19 @@ def _merge_locations(
 def extract_pii(
     text: str,
     turn_index: int = 0,
-    extra_patterns: List[dict] | None = None,
+    custom_patterns: List[dict] | None = None,
 ) -> List[DetectedEntity]:
     """Extract PII entities from text using Presidio + custom recognizers.
 
-    extra_patterns: optional list of dicts, each with keys:
+    custom_patterns: optional list of dicts, each with keys:
         entity  – entity type name (str, e.g. "EMPLOYEE_ID")
         pattern – regex string
         score   – confidence score (float, default 0.8)
     """
     ad_hoc = []
     custom_types: set[str] = set()
-    if extra_patterns:
-        for p in extra_patterns:
+    if custom_patterns:
+        for p in custom_patterns:
             entity  = p["entity"]
             pattern = p["pattern"]
             score   = p.get("score", 0.8)

@@ -25,5 +25,5 @@ from camp.integrations.llm import CAMPSession
 from camp.core.entities import DEFAULT_REDACTION_MAP, HARD_BLOCK_TYPES
 
 __all__ = ["CAMPMasker", "TurnResult", "CAMPSession", "DEFAULT_REDACTION_MAP", "HARD_BLOCK_TYPES"]
-__version__ = "0.1.2"
+__version__ = "0.1.6"
 __author__ = "Aman Panjwani"
