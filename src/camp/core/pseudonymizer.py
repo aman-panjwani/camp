@@ -114,7 +114,7 @@ class Pseudonymizer:
                 try:
                     amount:    float = float(int(numbers[0].replace(',', '')))
                     variation: float = float(random.randint(-10, 10))
-                    new_amount = round(int(amount * (1 + variation / 100)) / 1000) * 1000
+                    new_amount: float = round(int(amount * (1 + variation / 100)) / 1000) * 1000
                     return f"{new_amount:,} dollars a year"
                 except ValueError:
                     pass
@@ -146,7 +146,7 @@ class Pseudonymizer:
                 try:
                     amount    = float(numbers[0].replace(',', ''))
                     variation = random.uniform(0.85, 1.15)
-                    new_amount: float = amount * variation
+                    new_amount = amount * variation
                     suffix_match = re.search(r'[MBKmbk]$', real.strip())
                     if suffix_match:
                         return f"${round(new_amount)}{suffix_match.group(0).upper()}"

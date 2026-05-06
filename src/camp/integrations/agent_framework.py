@@ -189,7 +189,7 @@ def create_camp_middleware(
     )
     turn_index_box = [0]  # mutable container for closure state
 
-    @agent_middleware  # type: ignore[misc]
+    @agent_middleware  # type: ignore[untyped-decorator]
     async def _camp_middleware(
         context:   AgentContext,
         call_next: Callable[[], Awaitable[None]],
