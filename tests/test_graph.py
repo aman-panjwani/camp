@@ -1,5 +1,5 @@
+from camp.core.entities import EMAIL, LOCATION, PERSON
 from camp.core.graph import PIICooccurrenceGraph
-from camp.core.entities import PERSON, LOCATION, ORGANIZATION, EMAIL
 
 
 def test_empty_graph():

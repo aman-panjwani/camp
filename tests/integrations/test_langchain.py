@@ -3,11 +3,8 @@ LangChain integration tests - mock langchain_core to avoid the dependency in CI.
 """
 import sys
 from types import ModuleType
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from uuid import uuid4
-
-import pytest
-
 
 # ── Stub out langchain_core before importing the integration ──────
 
@@ -48,8 +45,6 @@ def _make_langchain_stub():
 _lc_stub, Generation, LLMResult = _make_langchain_stub()
 
 from camp.integrations.langchain import CAMPCallbackHandler, CAMPChain  # noqa: E402
-from camp.core.masker import PASS, BLOCK  # noqa: E402
-
 
 # ── CAMPCallbackHandler ───────────────────────────────────────────
 

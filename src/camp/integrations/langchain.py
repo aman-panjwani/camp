@@ -20,7 +20,7 @@ Two integration styles:
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 from uuid import UUID
 
 from camp.core.masker import CAMPMasker, TurnResult
@@ -52,7 +52,7 @@ class CAMPCallbackHandler(BaseCallbackHandler):
         alpha:       float            = 0.3,
         session_id:  str              = "default",
         redaction_map: dict[str, str] | None  = None,
-        masker:      Optional[CAMPMasker] = None,
+        masker:      CAMPMasker | None = None,
     ) -> None:
         super().__init__()
         self._masker = masker or CAMPMasker(
@@ -60,15 +60,15 @@ class CAMPCallbackHandler(BaseCallbackHandler):
             session_id=session_id, redaction_map=redaction_map,
         )
         self._turn_index          = 0
-        self._last_result:        Optional[TurnResult] = None
+        self._last_result:        TurnResult | None = None
         self._last_raw_llm_output: str = ""
 
     # ── LLM (non-chat) ────────────────────────────────────────
 
     def on_llm_start(
         self,
-        serialized: Dict[str, Any],
-        prompts: List[str],
+        serialized: dict[str, Any],
+        prompts: list[str],
         *,
         run_id: UUID,
         **kwargs: Any,
@@ -83,8 +83,8 @@ class CAMPCallbackHandler(BaseCallbackHandler):
 
     def on_chat_model_start(
         self,
-        serialized: Dict[str, Any],
-        messages: List[List[BaseMessage]],
+        serialized: dict[str, Any],
+        messages: list[list[BaseMessage]],
         *,
         run_id: UUID,
         **kwargs: Any,
@@ -133,7 +133,7 @@ class CAMPCallbackHandler(BaseCallbackHandler):
         return self._masker.scorer.triggered()
 
     @property
-    def last_result(self) -> Optional[TurnResult]:
+    def last_result(self) -> TurnResult | None:
         return self._last_result
 
     @property
@@ -169,19 +169,19 @@ class CAMPChain:
         alpha:       float           = 0.3,
         session_id:  str             = "default",
         redaction_map: dict[str, str] | None = None,
-    ) -> "CAMPChain":
+    ) -> CAMPChain:
         handler = CAMPCallbackHandler(
             threshold=threshold, alpha=alpha,
             session_id=session_id, redaction_map=redaction_map,
         )
         return cls(runnable, handler)
 
-    def invoke(self, inputs: Dict[str, Any], **kwargs: Any) -> Any:
+    def invoke(self, inputs: dict[str, Any], **kwargs: Any) -> Any:
         callbacks = list(kwargs.pop("callbacks", []))
         callbacks.append(self._handler)
         return self._runnable.invoke(inputs, callbacks=callbacks, **kwargs)
 
-    async def ainvoke(self, inputs: Dict[str, Any], **kwargs: Any) -> Any:
+    async def ainvoke(self, inputs: dict[str, Any], **kwargs: Any) -> Any:
         callbacks = list(kwargs.pop("callbacks", []))
         callbacks.append(self._handler)
         return await self._runnable.ainvoke(inputs, callbacks=callbacks, **kwargs)

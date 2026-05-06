@@ -5,23 +5,33 @@
 # Ensures referential consistency across turns so the LLM receives
 # a coherent conversation with no real PII.
 
-import re
 import random
-from typing import Dict, List
+import re
 
 from faker import Faker
 
-from camp.core.extractor import DetectedEntity
 from camp.core.entities import (
-    PERSON, LOCATION, ORGANIZATION,
-    EMAIL, PHONE, DATE_OF_BIRTH,
-    MEDICAL, SALARY, AGE, ETHNICITY,
-    DRIVER_LICENSE, ACCOUNT, CREDIT_CARD,
-    SWIFT_BIC, TRANSACTION_ID,
-    FINANCIAL_AMOUNT, FINANCIAL_METRIC,
-    INTERNAL_PROJECTION, CONFIDENTIAL_DATA,
-    DEFAULT_REDACTION_MAP, ENTITY_LABELS,
+    ACCOUNT,
+    AGE,
+    CONFIDENTIAL_DATA,
+    CREDIT_CARD,
+    DATE_OF_BIRTH,
+    DRIVER_LICENSE,
+    EMAIL,
+    ENTITY_LABELS,
+    ETHNICITY,
+    FINANCIAL_AMOUNT,
+    FINANCIAL_METRIC,
+    INTERNAL_PROJECTION,
+    LOCATION,
+    ORGANIZATION,
+    PERSON,
+    PHONE,
+    SALARY,
+    SWIFT_BIC,
+    TRANSACTION_ID,
 )
+from camp.core.extractor import DetectedEntity
 
 fake = Faker()
 Faker.seed(42)  # Reproducible results for paper experiments
@@ -38,8 +48,8 @@ class Pseudonymizer:
         if seed is not None:
             Faker.seed(seed)
         self._redaction_map = redaction_map  # None → use DEFAULT_REDACTION_MAP
-        self._map:         Dict[str, str] = {}
-        self._reverse_map: Dict[str, str] = {}
+        self._map:         dict[str, str] = {}
+        self._reverse_map: dict[str, str] = {}
 
     def get_pseudonym(self, entity: DetectedEntity) -> str:
         """
@@ -230,7 +240,7 @@ class Pseudonymizer:
 
         return f"[{ENTITY_LABELS.get(entity_type, entity_type)}]"
 
-    def pseudonymize_text(self, text: str, entities: List[DetectedEntity]) -> str:
+    def pseudonymize_text(self, text: str, entities: list[DetectedEntity]) -> str:
         """Replace all PII values in text with pseudonyms."""
         if not entities:
             return text
@@ -258,7 +268,7 @@ class Pseudonymizer:
                 result = result.replace(pseudo, real)
         return result
 
-    def rewrite_history(self, turns: list) -> List[str]:
+    def rewrite_history(self, turns: list) -> list[str]:
         """
         Retroactively rewrite full conversation history with pseudonyms.
         Called when CPE threshold is crossed.
@@ -269,8 +279,8 @@ class Pseudonymizer:
             rewritten.append(pseudo_text)
         return rewritten
 
-    def pseudonym_map(self) -> Dict[str, str]:
+    def pseudonym_map(self) -> dict[str, str]:
         return dict(self._map)
 
-    def reverse_map(self) -> Dict[str, str]:
+    def reverse_map(self) -> dict[str, str]:
         return dict(self._reverse_map)

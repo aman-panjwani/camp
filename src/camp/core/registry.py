@@ -7,7 +7,6 @@
 
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import Dict, List, Set
 
 from camp.core.extractor import DetectedEntity
 
@@ -17,10 +16,10 @@ class TurnRecord:
     turn_index:  int
     raw_text:    str
     masked_text: str
-    entities:    List[DetectedEntity] = field(default_factory=list)
+    entities:    list[DetectedEntity] = field(default_factory=list)
 
     @property
-    def entity_types(self) -> Set[str]:
+    def entity_types(self) -> set[str]:
         return {e.entity_type for e in self.entities}
 
     @property
@@ -36,15 +35,15 @@ class PIIRegistry:
 
     def __init__(self, session_id: str = "session") -> None:
         self.session_id = session_id
-        self._turns: List[TurnRecord] = []
-        self._type_index: Dict[str, List[DetectedEntity]] = defaultdict(list)
+        self._turns: list[TurnRecord] = []
+        self._type_index: dict[str, list[DetectedEntity]] = defaultdict(list)
 
     def add_turn(
         self,
         turn_index:  int,
         raw_text:    str,
         masked_text: str,
-        entities:    List[DetectedEntity],
+        entities:    list[DetectedEntity],
     ) -> TurnRecord:
         record = TurnRecord(
             turn_index=turn_index,
@@ -59,16 +58,16 @@ class PIIRegistry:
 
         return record
 
-    def all_entities(self) -> List[DetectedEntity]:
+    def all_entities(self) -> list[DetectedEntity]:
         result = []
         for record in self._turns:
             result.extend(record.entities)
         return result
 
-    def unique_types(self) -> Set[str]:
+    def unique_types(self) -> set[str]:
         return set(self._type_index.keys())
 
-    def entities_by_type(self) -> Dict[str, List[DetectedEntity]]:
+    def entities_by_type(self) -> dict[str, list[DetectedEntity]]:
         return dict(self._type_index)
 
     def get_turn(self, turn_index: int) -> TurnRecord | None:
@@ -77,21 +76,21 @@ class PIIRegistry:
                 return record
         return None
 
-    def all_turns(self) -> List[TurnRecord]:
+    def all_turns(self) -> list[TurnRecord]:
         return self._turns
 
-    def pii_types_at_turn(self, turn_index: int) -> Set[str]:
+    def pii_types_at_turn(self, turn_index: int) -> set[str]:
         """All unique PII types accumulated from turn 0 through turn_index."""
-        types: Set[str] = set()
+        types: set[str] = set()
         for record in self._turns:
             if record.turn_index <= turn_index:
                 types.update(record.entity_types)
         return types
 
-    def cumulative_types_per_turn(self) -> List[Set[str]]:
+    def cumulative_types_per_turn(self) -> list[set[str]]:
         """List where index i contains all unique PII types seen through turn i."""
         cumulative = []
-        seen: Set[str] = set()
+        seen: set[str] = set()
         for record in self._turns:
             seen = seen | record.entity_types
             cumulative.append(frozenset(seen))

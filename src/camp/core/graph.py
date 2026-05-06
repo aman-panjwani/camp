@@ -7,11 +7,10 @@
 # Used to compute combination amplifier for CPE score:
 #   f(v) = 1 + alpha * degree(v)
 
-from typing import List, Set, Tuple
 
 import networkx as nx
 
-from camp.core.entities import ENTITY_WEIGHTS, ENTITY_LABELS
+from camp.core.entities import ENTITY_LABELS, ENTITY_WEIGHTS
 
 
 class PIICooccurrenceGraph:
@@ -26,9 +25,9 @@ class PIICooccurrenceGraph:
     def __init__(self, alpha: float = 0.3) -> None:
         self.alpha = alpha
         self.graph: nx.Graph = nx.Graph()
-        self._snapshots: List[nx.Graph] = []
+        self._snapshots: list[nx.Graph] = []
 
-    def update(self, entity_types: Set[str]) -> None:
+    def update(self, entity_types: set[str]) -> None:
         """
         Update graph with entity types accumulated at current turn.
         Adds new nodes and edges between all pairs now in the session.
@@ -55,10 +54,10 @@ class PIICooccurrenceGraph:
             return 1.0
         return 1.0 + self.alpha * self.graph.degree(entity_type)
 
-    def nodes(self) -> List[str]:
+    def nodes(self) -> list[str]:
         return list(self.graph.nodes())
 
-    def edges(self) -> List[Tuple[str, str]]:
+    def edges(self) -> list[tuple[str, str]]:
         return list(self.graph.edges())
 
     def degree(self, entity_type: str) -> int:
@@ -72,7 +71,7 @@ class PIICooccurrenceGraph:
     def edge_count(self) -> int:
         return self.graph.number_of_edges()
 
-    def snapshots(self) -> List[nx.Graph]:
+    def snapshots(self) -> list[nx.Graph]:
         return self._snapshots
 
     def summary(self) -> dict:

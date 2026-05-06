@@ -8,15 +8,16 @@
 #   BLOCK        Hard-block entity detected - always block regardless of CPE
 
 import json
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable, List, Optional
+from typing import Any
 
-from camp.core.extractor import extract_pii, mask_text, DetectedEntity
-from camp.core.registry import PIIRegistry, TurnRecord
-from camp.core.graph import PIICooccurrenceGraph
 from camp.core.cpe import CPEScorer
+from camp.core.entities import get_risk_band
+from camp.core.extractor import DetectedEntity, extract_pii, mask_text
+from camp.core.graph import PIICooccurrenceGraph
 from camp.core.pseudonymizer import Pseudonymizer
-from camp.core.entities import get_risk_band, HARD_BLOCK_TYPES
+from camp.core.registry import PIIRegistry
 
 PASS         = "PASS"
 PSEUDONYMIZE = "PSEUDONYMIZE"
@@ -29,13 +30,13 @@ class TurnResult:
     turn_index:        int
     raw_text:          str
     sent_to_llm:       str
-    entities:          List[DetectedEntity]
+    entities:          list[DetectedEntity]
     cpe_score:         float
     risk_band:         str
     decision:          str
     triggered:         bool
-    trigger_turn:      Optional[int]
-    rewritten_history: Optional[List[str]]
+    trigger_turn:      int | None
+    rewritten_history: list[str] | None
 
 
 class CAMPMasker:
@@ -75,7 +76,7 @@ class CAMPMasker:
         self.graph         = PIICooccurrenceGraph(alpha=alpha)
         self.scorer        = CPEScorer(threshold=threshold, weights=entity_weights)
         self.pseudonymizer = Pseudonymizer(redaction_map=redaction_map)
-        self._results: List[TurnResult] = []
+        self._results: list[TurnResult] = []
 
     def process_turn(self, text: str, turn_index: int) -> TurnResult:
         """
@@ -142,13 +143,13 @@ class CAMPMasker:
         """Restore real identities in an LLM response."""
         return self.pseudonymizer.demask_response(response)
 
-    def results(self) -> List[TurnResult]:
+    def results(self) -> list[TurnResult]:
         return self._results
 
-    def cpe_history(self) -> List[float]:
+    def cpe_history(self) -> list[float]:
         return self.scorer.history()
 
-    def trigger_turn(self) -> Optional[int]:
+    def trigger_turn(self) -> int | None:
         return self.scorer.trigger_turn()
 
     def pseudonym_map(self) -> dict:

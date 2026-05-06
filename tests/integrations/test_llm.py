@@ -1,6 +1,7 @@
 import pytest
+
+from camp.core.masker import BLOCK, PASS
 from camp.integrations.llm import CAMPSession
-from camp.core.masker import PASS, BLOCK
 
 
 def _echo(message: str) -> str:

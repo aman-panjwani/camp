@@ -6,7 +6,6 @@
 # all downstream code continues to work without changes.
 
 from dataclasses import dataclass
-from typing import List
 
 # ── Entity type constants ─────────────────────────────────────────────────────
 # Module-level strings kept so all existing import sites remain unchanged.
@@ -52,7 +51,7 @@ class EntityDef:
     weight: float  # CPE scoring weight in (0, 1] - higher = more re-id risk
 
 
-ENTITY_CATALOG: List[EntityDef] = [
+ENTITY_CATALOG: list[EntityDef] = [
     # ── Hard financial / identity ─────────────────────────────────────────────
     EntityDef(SSN,            "SSN",               1.00),
     EntityDef(CREDIT_CARD,    "Credit Card",        1.00),

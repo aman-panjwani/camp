@@ -8,7 +8,6 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-
 # ── Stub out agent_framework before importing the integration ─────
 
 def _make_af_stub():
@@ -58,7 +57,6 @@ from camp.integrations.agent_framework import (  # noqa: E402
     CAMPAgentMiddleware,
     create_camp_middleware,
 )
-
 
 # ── Helpers ───────────────────────────────────────────────────────
 

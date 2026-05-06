@@ -1,6 +1,6 @@
-from camp.core.registry import PIIRegistry, TurnRecord
+from camp.core.entities import LOCATION, PERSON, SSN
 from camp.core.extractor import DetectedEntity
-from camp.core.entities import PERSON, LOCATION, SSN
+from camp.core.registry import PIIRegistry, TurnRecord
 
 
 def _entity(etype: str, value: str, turn: int = 0) -> DetectedEntity:

@@ -1,12 +1,11 @@
 from camp.core.entities import (
+    ACCOUNT,
     ALL_ENTITY_TYPES,
+    CREDIT_CARD,
     ENTITY_LABELS,
     ENTITY_WEIGHTS,
     HARD_BLOCK_TYPES,
     SSN,
-    CREDIT_CARD,
-    ACCOUNT,
-    PERSON,
     get_risk_band,
     get_risk_color,
 )

@@ -1,6 +1,6 @@
-from camp.core.graph import PIICooccurrenceGraph
 from camp.core.cpe import CPEScorer
-from camp.core.entities import PERSON, LOCATION, SALARY, ENTITY_WEIGHTS
+from camp.core.entities import ENTITY_WEIGHTS, LOCATION, PERSON, SALARY
+from camp.core.graph import PIICooccurrenceGraph
 
 
 def _run(entity_sets: list, threshold: float = 2.0, alpha: float = 0.3):

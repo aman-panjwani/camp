@@ -17,7 +17,7 @@ Pattern 2 - bound callable:
 
 from __future__ import annotations
 
-from typing import Callable, Optional
+from collections.abc import Callable
 
 from camp.core.masker import CAMPMasker, TurnResult
 
@@ -36,7 +36,7 @@ class CAMPSession:
         threshold:   float                       = 2.0,
         alpha:       float                       = 0.3,
         session_id:  str                         = "default",
-        llm_fn:      Optional[Callable[..., str]] = None,
+        llm_fn:      Callable[..., str] | None = None,
         redaction_map: dict[str, str] | None             = None,
     ) -> None:
         self._threshold   = threshold
@@ -58,7 +58,7 @@ class CAMPSession:
         alpha:       float           = 0.3,
         session_id:  str             = "default",
         redaction_map: dict[str, str] | None = None,
-    ) -> "CAMPSession":
+    ) -> CAMPSession:
         """Create a CAMPSession bound to a specific LLM callable."""
         return cls(
             threshold=threshold, alpha=alpha,

@@ -7,9 +7,8 @@
 #
 # Computes CPE after each turn using the current co-occurrence graph.
 
-from typing import Dict, List, Optional
 
-from camp.core.entities import ENTITY_WEIGHTS, ENTITY_LABELS, get_risk_band, get_risk_color, RESET
+from camp.core.entities import ENTITY_LABELS, ENTITY_WEIGHTS
 from camp.core.graph import PIICooccurrenceGraph
 
 
@@ -21,9 +20,9 @@ class CPEScorer:
     def __init__(self, threshold: float = 2.0, weights: dict[str, float] | None = None) -> None:
         self.threshold = threshold
         self._weights  = {**ENTITY_WEIGHTS, **(weights or {})}
-        self._history: List[float] = []
+        self._history: list[float] = []
         self._triggered = False
-        self._trigger_turn: Optional[int] = None
+        self._trigger_turn: int | None = None
 
     def compute(self, graph: PIICooccurrenceGraph) -> float:
         """
@@ -47,7 +46,7 @@ class CPEScorer:
 
         return score
 
-    def history(self) -> List[float]:
+    def history(self) -> list[float]:
         return self._history
 
     def current_score(self) -> float:
@@ -56,10 +55,10 @@ class CPEScorer:
     def triggered(self) -> bool:
         return self._triggered
 
-    def trigger_turn(self) -> Optional[int]:
+    def trigger_turn(self) -> int | None:
         return self._trigger_turn
 
-    def breakdown(self, graph: PIICooccurrenceGraph) -> Dict[str, dict]:
+    def breakdown(self, graph: PIICooccurrenceGraph) -> dict[str, dict]:
         """Per-entity contribution breakdown for inspection and paper tables."""
         result = {}
         for node in graph.nodes():
