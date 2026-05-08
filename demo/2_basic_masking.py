@@ -1,6 +1,5 @@
 """
-pip install campii anthropic python-dotenv
-python -m spacy download en_core_web_lg
+pip install campii
 """
 import os
 import sys
